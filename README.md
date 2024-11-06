@@ -14,6 +14,9 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 
 ```sh
 npm install
+npm install bootstrap
+npm install axios
+npm install vue-yandex-maps
 ```
 
 ### Compile and Hot-Reload for Development
