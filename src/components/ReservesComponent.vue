@@ -103,7 +103,10 @@ const showMapModal = (reserve) => {
       </tr>
       </thead>
       <tbody>
-      <tr v-for="reserve in filteredReserves" :key="reserve.id">
+      <tr v-if="reserves.length === 0">
+        Записи отсутствуют
+      </tr>
+      <tr v-else v-for="reserve in filteredReserves" :key="reserve.id">
         <th>{{ reserve.id }}</th>
         <td>{{ reserve.name }}</td>
         <td>{{ reserve.description }}</td>
