@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineEmits, onMounted, ref } from 'vue'
+import { computed, defineEmits, onMounted, ref, watch } from 'vue'
 import { useParameters } from '@/stores/parameters.js'
 import MyMapForm from '@/components/Forms/MyMapForm.vue'
 
@@ -22,6 +22,16 @@ const purposes = computed(() => parameters.purposes)
 onMounted(() => {
   parameters.fetchParameters()
 })
+
+watch(
+  () => reserve.value.region,
+  (newRegion) => {
+    if (newRegion) {
+      parameters.fetchCities(newRegion.id);
+      reserve.value.city = null;
+    }
+  }
+);
 
 const emitReserveData = () => {
   emit('saveReserveData', reserve.value)
@@ -128,12 +138,12 @@ const emitReserveData = () => {
       <div class="mb-3">
         <label for="x" class="form-label">Выберите место на карте:</label>
         <MyMapForm
-          v-model:x="reserve.coordinates.x"
-          v-model:y="reserve.coordinates.y"
+          v-model:x="reserve.x"
+          v-model:y="reserve.y"
         />
         <div>
           <label>Текущие координаты:</label>
-          <p>x : {{ reserve.coordinates.x }} y : {{ reserve.coordinates.y }}</p>
+          <p>x : {{ reserve.x }} y : {{ reserve.y }}</p>
         </div>
       </div>
     </div>

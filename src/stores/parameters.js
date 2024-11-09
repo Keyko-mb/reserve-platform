@@ -16,9 +16,6 @@ export const useParameters = defineStore('parameters', {
         axios.get('regions').then((response) => {
           this.regions = response.data
         });
-        axios.get('cities').then((response) => {
-          this.cities = response.data
-        });
         axios.get('categories').then((response) => {
           this.categories = response.data
         });
@@ -33,6 +30,13 @@ export const useParameters = defineStore('parameters', {
         });
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
+      }
+    },
+    fetchCities(regionId) {
+      if (regionId) {
+        axios.get(`regions/cities/${regionId}`).then((response) => {
+          this.cities = response.data
+        });
       }
     }
   },

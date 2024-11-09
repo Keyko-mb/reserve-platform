@@ -57,7 +57,7 @@ const showReserveAddModal= () => {
 
 const showMapModal = (reserve) => {
   mapTitle.value = reserve.name
-  mapCoordinates.value = { x: reserve.coordinates.x, y:reserve.coordinates.y}
+  mapCoordinates.value = { x: reserve.x, y:reserve.y}
   modalMap.show();
 }
 

@@ -5,14 +5,17 @@ import {
   YandexMapDefaultSchemeLayer,
   YandexMapZoomControl
 } from 'vue-yandex-maps'
-import { LngLat } from '@yandex/ymaps3-types';
 import { ref, watch } from 'vue'
+
+/**
+ * @typedef {import('@yandex/ymaps3-types').LngLat} LngLat
+ */
 
 const props = defineProps(['title', 'x', 'y'])
 
 const marker = ref({
   title: props.title,
-  coordinates: <LngLat> [props.y, props.x],
+  coordinates: /** @type {LngLat} */ ([props.y, props.x]),
 })
 
 watch(() => [props.y, props.x], ([newY, newX]) => {
