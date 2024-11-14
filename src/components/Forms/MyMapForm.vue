@@ -9,10 +9,14 @@ import { shallowRef, triggerRef } from 'vue'
 /**
  * @typedef {import('@yandex/ymaps3-types').LngLat} LngLat
  */
+const props = defineProps({
+  x: { type: Number, default: 37.617644 }, // например, Москва
+  y: { type: Number, default: 55.755819 }, // например, Москва
+});
 
 /** @type {import('vue').ShallowRef<YMapDefaultMarker | null>} */
 const marker = shallowRef(null);
-const center =/** @type {LngLat} */ ([37.617644, 55.755819]);
+const center =/** @type {LngLat} */ [props.y, props.x];
 const emit = defineEmits(['update:x', 'update:y']);
 
 const onDragMove = () => {
@@ -37,17 +41,17 @@ const onDragMove = () => {
       <yandex-map-controls :settings="{ position: 'right' }">
         <yandex-map-zoom-control/>
       </yandex-map-controls>
-        <yandex-map-default-marker
-          v-model="marker"
-          :settings="{
+      <yandex-map-default-marker
+        v-model="marker"
+        :settings="{
             coordinates: marker?.coordinates || center,
             title: marker?.coordinates
-              ? `Широта: ${marker.coordinates[1].toFixed(2)}<br>Долгота: ${marker.coordinates[0].toFixed(2)}`
-              : 'Инициализация...',
-            draggable: true,
-            onDragMove,
+            ? `Широта: ${marker.coordinates[1] ? marker.coordinates[1].toFixed(2) : 'Не определена'}<br>Долгота: ${marker.coordinates[0] ? marker.coordinates[0].toFixed(2) : 'Не определена'}`
+            : 'Инициализация...',
+          draggable: true,
+          onDragMove,
           }"
-        />
+      />
     </yandex-map>
   </div>
 </template>

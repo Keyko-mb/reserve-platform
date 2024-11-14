@@ -53,6 +53,14 @@ const removeImage = (id) => {
     });
 }
 
+watch(
+  () => props.reserve,
+  (newReserve) => {
+    reserve.value = { ...newReserve };
+  },
+  { deep: true }
+);
+
 </script>
 
 <template>
@@ -65,7 +73,7 @@ const removeImage = (id) => {
 
       <div class="mb-3">
         <label for="description" class="form-label">Описание</label>
-        <textarea rows="3" id="description" v-model="reserve.description" class="form-control" value=""/>
+        <textarea rows="3" id="description" v-model="reserve.description" class="form-control"/>
       </div>
 
       <div class="mb-3">
