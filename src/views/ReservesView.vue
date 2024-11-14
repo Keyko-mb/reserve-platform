@@ -4,6 +4,7 @@ import { onMounted, ref} from 'vue'
 import axios from 'axios'
 
 const reserves = ref([]);
+const img = ref({});
 const isLoading = ref(false);
 
 onMounted(async () => {
@@ -13,6 +14,11 @@ onMounted(async () => {
       .get('reserves')
       .then((response) => {
         reserves.value = response.data
+
+        for (const reserve of reserves.value) {
+          fetchReserveImages(reserve.id);
+        }
+
       })
   } catch (error) {
     console.error("Ошибка при получении данных:", error);
@@ -21,14 +27,36 @@ onMounted(async () => {
   }
 })
 
-const addReserve = (newReserve) => {
+const fetchReserveImages = async (reserveId) => {
+  try {
+    await axios
+      .get(`images/reserve/${reserveId}`)
+      .then((response) => {
+        img.value[reserveId] = response.data;
+      })
+  } catch (error) {
+    console.error("Ошибка при загрузке изображений:", error);
+  }
+}
+
+const addReserve = (newReserve, img) => {
   axios.post(`reserves`, newReserve)
-    .then((response) => {
+    .then(async (response) => {
       reserves.value.push(response.data);
+      const reserveId = response.data.id;
+      for (const image of img) {
+        await uploadImage(image, reserveId);
+      }
+      await fetchReserveImages(reserveId);
     })
 };
 
-const deleteReserve = (id) => {
+const deleteReserve = async (id) => {
+  for (const image of img.value[id]) {
+    await deleteImage(image.id, id);
+  }
+  img.value[id] = [];
+
   axios.delete(`reserves/${id}`)
     .then(() => {
       const index = reserves.value.findIndex(reserve => reserve.id === id);
@@ -38,15 +66,39 @@ const deleteReserve = (id) => {
     })
 }
 
-const editReserve = (updatedReserve) => {
+const editReserve = (updatedReserve, img) => {
   axios
     .put(`reserves/${updatedReserve.id}`, updatedReserve)
-    .then(() => {
+    .then(async () => {
       const index = reserves.value.findIndex(reserve => reserve.id === updatedReserve.id);
       if (index !== -1) {
         reserves.value[index] = { ...updatedReserve };
       }
+      for (const image of img) {
+        await uploadImage(image, updatedReserve.id);
+      }
+      await fetchReserveImages(updatedReserve.id);
     });
+}
+
+const uploadImage = async (file, reserveId) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('reserveId', reserveId);
+  try {
+    await axios.post('images/upload', formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+  } catch (error) {
+    console.error("Ошибка при загрузке изображения, возможно файл слишком большой:", error);
+  }
+}
+
+const deleteImage = async (imageId) => {
+  await axios.delete(`images/${imageId}`);
 }
 </script>
 
@@ -56,6 +108,7 @@ const editReserve = (updatedReserve) => {
     <div v-if="!isLoading">
       <ReservesComponent
         :reserves="reserves"
+        :img="img"
         @addReserve="addReserve"
         @deleteReserve="deleteReserve"
         @editReserve="editReserve"/>

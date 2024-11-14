@@ -1,22 +1,26 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import * as bootstrap from 'bootstrap';
 import EditAndDeleteButtons from '@/components/UI/EditAndDeleteButtons.vue'
 import MyAddModal from '@/components/UI/MyAddModal.vue'
 import ReserveForm from '@/components/Forms/ReserveForm.vue'
 import MyEditModal from '@/components/UI/MyEditModal.vue'
 import MyMapModal from '@/components/UI/MyMapModal.vue'
+import MyImgModal from '@/components/UI/MyImgModal.vue'
 
-const props = defineProps(['reserves'])
+const props = defineProps(['reserves', 'img'])
 const emits = defineEmits(['addReserve', 'deleteReserve', 'editReserve'])
 
 const selectedReserve = ref(null)
 const mapTitle = ref('');
 const mapCoordinates = ref({ x: 0, y: 0 });
+const modalImages = ref([])
+const modalEditImages = ref(null)
 
 let modalAddInstance;
 let modalEditInstance;
 let modalMap;
+let modalImg;
 
 const searchQuery = ref('');
 
@@ -30,10 +34,11 @@ onMounted(() => {
   modalAddInstance = new bootstrap.Modal(document.getElementById('reserveAddModal'))
   modalEditInstance = new bootstrap.Modal(document.getElementById('reserveEditModal'))
   modalMap = new bootstrap.Modal(document.getElementById('reserveMapModal'))
+  modalImg = new bootstrap.Modal(document.getElementById('reserveImgModal'))
 })
 
-const emitAddReserve = (newReserve) => {
-  emits('addReserve', newReserve)
+const emitAddReserve = (newReserve, img) => {
+  emits('addReserve', newReserve, img)
   modalAddInstance.hide();
 }
 
@@ -41,13 +46,14 @@ const emitDeleteReserve = (reserveId) => {
   emits('deleteReserve', reserveId)
 }
 
-const emitEditReserve = (updatedReserve) => {
-  emits('editReserve', updatedReserve)
+const emitEditReserve = (updatedReserve, img) => {
+  emits('editReserve', updatedReserve, img)
   modalEditInstance.hide();
 }
 
 const showReserveEditModal= (reserve) => {
   selectedReserve.value = { ...reserve }
+  modalEditImages.value = reactive({ ...props.img[reserve.id] });
   modalEditInstance.show();
 }
 
@@ -59,6 +65,11 @@ const showMapModal = (reserve) => {
   mapTitle.value = reserve.name
   mapCoordinates.value = { x: reserve.x, y:reserve.y}
   modalMap.show();
+}
+
+const showImgModal = (reserve) => {
+  modalImages.value = props.img[reserve.id] || []
+  modalImg.show();
 }
 
 </script>
@@ -89,15 +100,16 @@ const showMapModal = (reserve) => {
         <th>Состояние</th>
         <th>Тип</th>
         <th>Цель</th>
-        <th>Отдел</th>
+        <th>Департамент</th>
         <th>Количество кластеров</th>
         <th>Размер</th>
         <th>Охраняемый размер</th>
         <th>Почта</th>
         <th>Руководитель</th>
         <th>Телефон</th>
-        <th>Ссылка</th>
         <th>Электронная почта</th>
+        <th>Ссылка</th>
+        <th>Изображения</th>
         <th>Местоположение</th>
         <th>Действия</th>
       </tr>
@@ -124,10 +136,13 @@ const showMapModal = (reserve) => {
         <td>{{ reserve.mail }}</td>
         <td>{{ reserve.supervisor }}</td>
         <td>{{ reserve.phone }}</td>
+        <td>{{ reserve.email }}</td>
         <td>
           <a :href="reserve.link">{{ reserve.link }}</a>
         </td>
-        <td>{{ reserve.email }}</td>
+        <td>
+          <button class="btn btn-link p-0" @click="showImgModal(reserve)">Посмотреть</button>
+        </td>
         <td>
           <button class="btn btn-link p-0" @click="showMapModal(reserve)">Показать на карте</button>
         </td>
@@ -147,8 +162,10 @@ const showMapModal = (reserve) => {
         id="reserveEditModal"
         :title="'Редактировать заповедник'">
         <ReserveForm
-          v-if="selectedReserve"
+          :key="selectedReserve? selectedReserve.id : ''"
+          v-if="selectedReserve && modalEditImages"
           :reserve="selectedReserve"
+          :img="modalEditImages"
           @saveReserveData="emitEditReserve">
         </ReserveForm>
       </MyEditModal>
@@ -159,6 +176,11 @@ const showMapModal = (reserve) => {
           :x="mapCoordinates.x"
           :y="mapCoordinates.y">
       </MyMapModal>
+      <MyImgModal
+          id="reserveImgModal"
+          v-show="modalImages"
+          :img="modalImages">
+      </MyImgModal>
     </div>
   </div>
 </template>

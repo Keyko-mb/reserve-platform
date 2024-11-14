@@ -18,7 +18,7 @@ services:
       - app-network
 
   spring-server:
-    image: astraklaus/reserve-app:latest  # Docker Hub образ вашего Spring-сервера
+    image: astraklaus/reserve-app:reserve  # Docker Hub образ вашего Spring-сервера
     container_name: reserve-app
     ports:
       - "8084:8084"                # Проброс порта сервера наружу
@@ -46,6 +46,21 @@ services:
       - app-network
     ports:
       - "5432:5432"
+
+  pgadmin:
+    container_name: pgadmin_recerver
+    image: dpage/pgadmin4
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    networks:
+      - app-network
+    ports:
+      - "5050:80"
+
 
 volumes:
   node_modules:
